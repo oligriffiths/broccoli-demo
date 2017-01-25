@@ -184,6 +184,7 @@ hello world
 ```
 
 ```js
+// Brocfile.js
 const funnel = require('broccoli-funnel');
 const merge = require('broccoli-merge-trees');
 
@@ -245,6 +246,7 @@ echo "\$body-color: palegreen;\html{ background: \$body-color; border: 5px solid
 ```
 
 ```js
+// Brocfile.js
 const funnel = require('broccoli-funnel');
 const merge = require('broccoli-merge-trees');
 const compileSass = require('broccoli-sass-source-maps');
