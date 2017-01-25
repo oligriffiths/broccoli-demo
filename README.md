@@ -308,6 +308,7 @@ const css = compileSass(
 
 Now `build & serve` and you should see that when inspecting the html tag, the line has changed to line 2 and the
 file is now `app.scss`. If you click the file name in the inspector, it should take you to the source `app.scss` 
-file, showing the original scss, complete with variables.
+file, showing the original scss, complete with variables. You can optionally choose to embed the sourcemap rather
+than generate a separate `app.css.map` file by adding the `sourceMapEmbed: true` option, I prefer this.
 
 See the Github repo for more details on further configuration options.
