@@ -1,6 +1,7 @@
 const funnel = require('broccoli-funnel');
 const merge = require('broccoli-merge-trees');
 const compileSass = require('broccoli-sass-source-maps');
+const babel = require('broccoli-babel-transpiler');
 
 const appRoot = 'app';
 
@@ -11,9 +12,14 @@ const html = funnel(appRoot, {
 });
 
 // Copy JS file into assets
-const js = funnel(appRoot, {
+let js = funnel(appRoot, {
   files : ['app.js'],
   destDir : '/assets'
+});
+
+js = babel(js, {
+  browserPolyfill: true,
+  sourceMap: 'inline',
 });
 
 // Copy CSS file into assets
