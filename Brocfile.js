@@ -3,6 +3,7 @@ const merge = require('broccoli-merge-trees');
 const compileSass = require('broccoli-sass-source-maps');
 const babel = require('broccoli-babel-transpiler');
 const Rollup = require('broccoli-rollup');
+const LiveReload = require('broccoli-livereload');
 
 const appRoot = 'app';
 
@@ -41,7 +42,16 @@ const css = compileSass(
   {
     sourceMap: true,
     sourceMapContents: true,
+    sourceMapEmbed: true,
   }
 );
 
-module.exports = merge([html, js, css]);
+// Merge the html, js and css trees
+let tree = merge([html, js, css]);
+
+// Include live reaload server
+tree = new LiveReload(tree, {
+  target: 'index.html',
+});
+
+module.exports = tree;

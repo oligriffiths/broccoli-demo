@@ -301,6 +301,7 @@ const css = compileSass(
   'assets/app.css',
   {
     sourceMap: true,
+    sourceMapEmbed: true,
     sourceMapContents: true,
   }
 );
@@ -308,8 +309,7 @@ const css = compileSass(
 
 Now `build & serve` and you should see that when inspecting the html tag, the line has changed to line 2 and the
 file is now `app.scss`. If you click the file name in the inspector, it should take you to the source `app.scss` 
-file, showing the original scss, complete with variables. You can optionally choose to embed the sourcemap rather
-than generate a separate `app.css.map` file by adding the `sourceMapEmbed: true` option, I prefer this.
+file, showing the original scss, complete with variables.
 
 See the Github repo for more details on further configuration options.
 
@@ -374,6 +374,7 @@ const css = compileSass(
   'assets/app.css',
   {
     sourceMap: true,
+    sourceMapEmbed: true,
     sourceMapContents: true,
   }
 );
@@ -508,6 +509,7 @@ const css = compileSass(
   'assets/app.css',
   {
     sourceMap: true,
+    sourceMapEmbed: true,
     sourceMapContents: true,
   }
 );
@@ -571,3 +573,44 @@ Now open `dist/assets/app.js`, notice how the `bar` is nowhere to be seen? What 
 
 This is part of the magic of Rollup, it knows, through static analysis, what code is not being used
 and dynamically removes it. Cool huh?
+
+
+## Live Reload
+
+Well, obviously in dev we'd quite like to not have to hit refresh all the time, because developers are,
+well, we're lazy. So we can use a live reload server to do the job for us.
+
+```
+npm install --save-dev broccoli-livereload
+```
+
+```js
+// Broccoli.js - add this line to the top
+const LiveReload = require('broccoli-livereload');
+
+// Remove the existing module.exports and replace with:
+let tree = merge([html, js, css]);
+
+// Include live reaload server
+tree = new LiveReload(tree, {
+  target: 'index.html',
+});
+
+module.exports = tree;
+```
+
+Now `build & serve`, try changing a `scss` file, notice how the css refreshes in place, no browser
+refresh. Change a `.js` or `.html` file and the page will refresh. This doesn't support fancy hot
+reloading like React and Webpack does, but that's a slightly different ballgame, and I'm sure someone
+clever will work that out.
+
+## Conclusion
+
+Well that just about sums it up. As you can see, `Broccoli.js` is a pretty powerful tool, there are a 
+bunch of other cool filters and plugins for broccoli [on npm](https://www.npmjs.com/search?q=broccoli-).
+Mix and match, merge, concat, filter to your hearts content.
+
+Hopefully this tutorial has helped you understand how to cook your
+vegetables.
+
+Peace.
