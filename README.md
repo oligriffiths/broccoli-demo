@@ -23,28 +23,31 @@ a set of files, usually applied through some kind of `glob()` type file finder, 
 post processing, and ultimately working on files/streams directly. Broccoli on the other hand works on the
 concept of `trees`.
 
-Trees themselves don't actually contain file contents, and manipulations to the trees
-don't happen when you create or change them. They're essentially representations of state, once all declared
-manipulations have been done on the tree, it gets processed, and at this point, the files are actually read
-and operations performed. This means that the setup for the trees and the operations that will be performed
-are very fast.
-
-Additionally, when files are changed, Broccoli only needs to rebuild certain trees and not
-the entire application, this makes rebuilds *crazy* fast. For example, say you only change an image that is
-just being copied verbatim from a source directory to the target directory, only that specific subtree needs
-to be re-built, however javascript doesn't need to be compiled, scss files don't need to be parsed, etc.
-
-
-## What is a tree?
+### What is a tree?
 
 A Broccoli tree can be thought of much like a file system tree. Think of a directory, that contains files, and
-directories, that also contains files, and so on. See, a tree. Trees can then be manipulated via various broccoli
-plugins, to do things like copy files to the destination directory, pre-process files within a tree and convert
-them from one format to another (e.g. .scss to .css), merge trees together (think rsync'ing one directory into
-another), concatenate files of a certain type into one (bundling), uglifying, and so on.
+directories, that also contains files, and so on, much like the branches of a tree. 
+
+Trees can then be manipulated via various broccoli plugins, to do things like copy files to the destination 
+directory, pre-process files within a tree and convert them from one format to another (e.g. .scss to .css), 
+merge trees together (think rsync'ing one directory into another), concatenate files of a certain type into 
+one (bundling), uglifying, and so on.
+
+### How do trees work?
+
+Trees themselves don't actually contain file contents, and manipulations to the trees don't happen when you
+create or change them. They're essentially representations of state, once all declared manipulations have been 
+done on the tree, it gets processed, and at this point, the files are actually read and operations performed.
+This means that the setup for the trees and the operations that will be performed are very fast.
+
+Additionally, when files are changed, Broccoli only needs to rebuild certain trees and not the entire 
+application, this makes rebuilds *crazy* fast. Additionally, trees can be cached for extra speeds.
+
+For example, say you only change an image that is just being copied verbatim from a source directory to the 
+target directory, only that specific subtree needs to be re-built, however javascript doesn't need to be 
+compiled, scss files don't need to be parsed, etc.
 
 It sounds like a lot, but it's actually quite simple, so let's get started with a simple Broccoli app.
-
 
 ## Setup:
 ```
