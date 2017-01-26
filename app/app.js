@@ -1,8 +1,4 @@
-const message = 'Eat your greens';
-function foo() {
-    setTimeout(() => {
-        alert(message);
-        console.log(this);
-    });
-}
-new foo();
+import foo from './foo';
+import bar from './foo';
+
+console.log(foo);

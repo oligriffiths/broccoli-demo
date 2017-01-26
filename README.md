@@ -138,8 +138,8 @@ Open a browser and point to:
 http://localhost:4200
 ```
 
-And you should see your "Hello World" HTML page rendered. Try changing the content of the `index.html` file, you should
-see Broccoli rebuild once you save the file, and output the build time for each of the slowest trees it built 
+And you should see your "Hello World" HTML page rendered. Try changing the content of the `index.html` file, you 
+should see Broccoli rebuild once you save the file, and output the build time for each of the slowest trees it built 
 (there's only one right now). Once it's rebuilt, refresh your browser to see your changes.
 
 Well done, you've now built your first Broccoli powered app!
@@ -414,3 +414,160 @@ If you run this in the browser, you'll see the alert and the correct `this` is l
 
 Now try adding a `debugger;` statement into the function and notice that the console stops at the breakpoint.
 The presented source code should be the original ES6 version, *not* the transpiled ES5 version.
+
+## JS imports
+
+ES6 allows you to import code from other Javascript files using the following syntax:
+
+```js
+import foo from './foo'; 
+```
+
+Try creating a file `app/foo.js` with the contents:
+
+```js
+export const bar = 'bar';
+export default 'foo';
+```
+
+and set the contents of `app/app.js` to:
+
+```js
+import foo from './foo';
+import bar from './foo';
+
+console.log(foo);
+```
+
+Now `build & serve`, refresh the browser, and:
+
+```
+app.js:5 Uncaught ReferenceError: require is not defined
+    at app.js:5
+```
+
+Uh oh, what's going on? Well, babel will transpile ES6 to ES5, however `import` statements are converted to
+node compatible `require()` AMD calls. The browser doesn't have a mechanism for resolving `require()` calls by default
+so we need a way of handling this. There are a couple of solutions for this.
+
+* Browserify via `broccoli-watchify`
+* Requirejs via `broccoli-requirejs`
+* Rollup via `broccoli-rollup`
+
+We're going to focus on [Rollup](http://rollupjs.org/) here because aside from module loading, it has some fairly 
+cool other features we will touch on.
+
+Here's what the website says:
+
+> Rollup is a next-generation JavaScript module bundler. Author your app or library using ES2015 modules, then 
+efficiently bundle them up into a single file for use in browsers and Node.js
+
+So, first off, install rollup:
+
+```
+npm install --save-dev broccoli-rollup
+```
+
+And set your `Broccoli.js` file to:
+
+```js
+const funnel = require('broccoli-funnel');
+const merge = require('broccoli-merge-trees');
+const compileSass = require('broccoli-sass-source-maps');
+const babel = require('broccoli-babel-transpiler');
+const Rollup = require('broccoli-rollup');
+
+const appRoot = 'app';
+
+// Copy HTML file from app root to destination
+const html = funnel(appRoot, {
+  files : ['index.html'],
+  destDir : '/'
+});
+
+// Rollup dependencies
+let js = new Rollup(appRoot, {
+  inputFiles: ['**/*.js'],
+  rollup: {
+    entry: 'app.js',
+    dest: 'assets/app.js',
+    sourceMap: 'inline'
+  }
+});
+
+// Transpile to ES5
+js = babel(js, {
+  browserPolyfill: true,
+  sourceMap: 'inline',
+});
+
+// Copy CSS file into assets
+const css = compileSass(
+  [appRoot],
+  'styles/app.scss',
+  'assets/app.css',
+  {
+    sourceMap: true,
+    sourceMapContents: true,
+  }
+);
+
+module.exports = merge([html, js, css]);
+```
+
+Here are the changes:
+
+1. Removed the JS funnel, this is no longer needed
+2. Now we pass `appRoot` to `Rollup`, pass it an input filter with `inputFiles` to include all JS files
+3. Rollup is configured with an `entry` file, this is the first file that is `required`.
+4. Define a destination for the resulting rolled up build, and enable sourceMaps.
+5. Run this tree through babel to transpile to ES5
+
+Now `build & serve` and notice that the `requre()` error has gone, and it console logs out `foo`, all is
+good in the world!
+
+But wait, there's more...
+
+Whereas Browserify and Requirejs will wrap each module in a specialised function, rollup is more intelligent
+and hoists modules up to first class citizens, producing the most efficient output.
+Checkout `dist/assets/app.js`, you should see:
+
+```js
+'use strict';
+
+var foo = 'foo';
+
+console.log(foo);
+```
+
+As you can see, even though `app.js` imports `foo.js`, the compiled output contains no wrapping functions,
+no extraneous code, just the value imported from `foo.js` and the `console.log()` statement. 
+
+** The audience gasps in amazement **
+
+But wait, there's more?
+
+### Tree shaking
+
+This is not a euphamism, it's an actual term that refers to removing dead/unused imported code.
+
+Open `app/foo.js`
+
+Notice we're also exporting a constant:
+
+```js
+export const bar = 'bar';
+```
+
+Open `app/app.js`
+
+Notice we're importing this constant:
+
+```js
+import bar from './foo';
+```
+
+Now open `dist/assets/app.js`, notice how the `bar` is nowhere to be seen? What is this witchcraft?
+
+This is part of the magic of Rollup, it knows, through static analysis, what code is not being used
+and dynamically removes it. Cool huh?
