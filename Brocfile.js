@@ -46,8 +46,16 @@ const css = compileSass(
   }
 );
 
-// Merge the html, js and css trees
+// Copy public files app root to destination
+const pub = funnel('public', {
+    destDir : '/'
+});
+
+// Merge the html, js, css and public trees
 let tree = merge([html, js, css]);
+
+// Merge public tree in
+tree = merge([pub, tree], {overwrite: true});
 
 // Include live reaload server
 tree = new LiveReload(tree, {
