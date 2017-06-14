@@ -4,7 +4,9 @@
   "description": "Setup: ``` npm install -g broccoli npm install --save-dev broccoli ```",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "rm -rf dist && broccoli build dist",
+    "build-prod": "rm -rf dist && BROCCOLI_ENV=production broccoli build dist",
+    "serve": "broccoli serve"
   },
   "author": "",
   "license": "ISC",
