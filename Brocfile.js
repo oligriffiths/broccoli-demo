@@ -4,6 +4,9 @@ const compileSass = require('broccoli-sass-source-maps');
 const babel = require('broccoli-babel-transpiler');
 const Rollup = require('broccoli-rollup');
 const LiveReload = require('broccoli-livereload');
+const resolve = require('rollup-plugin-node-resolve');
+const babelRollup = require('rollup-plugin-babel');
+const commonjs = require('rollup-plugin-commonjs');
 
 const appRoot = 'app';
 
@@ -22,17 +25,30 @@ let js = funnel(appRoot, {
 js = new Rollup(js, {
   inputFiles: ['**/*.js'],
   rollup: {
+    // external: external,
     entry: 'app.js',
     dest: 'assets/app.js',
-    sourceMap: 'inline'
+    sourceMap: 'inline',
+    format: 'iife',
+    plugins: [
+      commonjs(),
+      resolve({
+        jsnext: true,
+        main: true,
+        browser: true,
+      }),
+      babelRollup({
+        exclude: 'node_modules/**'
+      }),
+    ],
   }
 });
 
 // Transpile to ES5
-js = babel(js, {
-  browserPolyfill: true,
-  sourceMap: 'inline',
-});
+// js = babel(js, {
+//   browserPolyfill: true,
+//   sourceMap: 'inline',
+// });
 
 // Copy CSS file into assets
 const css = compileSass(
